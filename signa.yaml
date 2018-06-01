@@ -1,5 +1,5 @@
 bot-username: dronek8s
-slack-token: xoxb-327109093988-dQhgWMpWQirKohy4fxdiJ1z1
+slack-token: xoxb
 log: /var/log/signa.log
 rollback-check: 10
 superusers:
