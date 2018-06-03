@@ -20,12 +20,15 @@ import (
 	//	"github.com/signavio/signa/pkg/slack"
 )
 
-// Message d
-type Message struct {
-	Name string
-	Body string
-	Time int64
-}
+// Version app
+var Version = "version"
+
+// BuildInfo app
+var BuildInfo = "commit [7]"
+
+// Revision app
+var Revision = Version + "+" + BuildInfo[0:7]
+
 type response struct {
 	FulfillmentText string `json:"fulfillmentText"`
 }
@@ -99,7 +102,10 @@ func main() {
 	//
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", tomHandler)
-	log.Printf("Go!")
+	router.HandleFunc("/version", versionHandler)
+	router.HandleFunc("/healthz", healthzHandler)
+
+	log.Printf(Revision)
 	//
 	log.Fatal(http.ListenAndServeTLS(":443", "cert.pem", "key.pem", router))
 	//log.Fatal(http.ListenAndServe(":8080", router))
@@ -120,9 +126,18 @@ func loadConfig(file string) map[string]interface{} {
 	return c
 }
 
-func tomHandler(w http.ResponseWriter, r *http.Request) {
+func versionHandler(w http.ResponseWriter, r *http.Request) {
+	var b []byte
+	b = append([]byte("Version:"), Revision...)
+	w.Write(b)
+}
 
-	//response := resp{speech: " i have bought the tickets to the theatre"}
+func healthzHandler(w http.ResponseWriter, r *http.Request) {
+
+	w.Write([]byte("Alive!"))
+}
+
+func tomHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case "GET":
@@ -140,7 +155,7 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 				panic(err)
 			}
 		}
-		//fmt.Fprintf(w, m.QueryResult.Parameters.Param)
+		fmt.Fprintf(w, m.QueryResult.Parameters.Param0)
 		//result, _ := info(m)
 		//mm := Message{"Alice", "Hello", 1294706395881547000}
 
