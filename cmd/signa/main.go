@@ -146,6 +146,7 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 
 		resp.fulfillmentText = "Alice"
 		result, _ := json.Marshal(&resp)
+		log.Print(resp)
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(result))
 		// Decode the JSON in the body and overwrite 'tom' with it
