@@ -26,7 +26,9 @@ type Message struct {
 	Body string
 	Time int64
 }
-
+type responseOne struct {
+	FulfillmentText string
+}
 type response struct {
 	FulfillmentText     string
 	FulfillmentMessages struct {
@@ -141,7 +143,7 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 		//result, _ := info(m)
 		//mm := Message{"Alice", "Hello", 1294706395881547000}
 
-		resp := response{FulfillmentText: "Alice"}
+		resp := responseOne{FulfillmentText: "Alice"}
 		result, _ := json.Marshal(resp)
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(result))
