@@ -3,7 +3,6 @@ package main
 import (
 	//	"encoding/json"
 	"encoding/json"
-	//	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -11,13 +10,12 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/gorilla/mux"
-	"google.golang.org/appengine"
 	yaml "gopkg.in/yaml.v2"
-	//_ "github.com/signavio/signa/ext/kubernetes/deployment"
-	//_ "github.com/signavio/signa/ext/kubernetes/get"
-	//_ "github.com/signavio/signa/ext/kubernetes/info"
-	//_ "github.com/signavio/signa/ext/kubernetes/jobs"
+
+	_ "github.com/signavio/signa/ext/kubernetes/deployment"
+	_ "github.com/signavio/signa/ext/kubernetes/get"
+	_ "github.com/signavio/signa/ext/kubernetes/info"
+	_ "github.com/signavio/signa/ext/kubernetes/jobs"
 	//	"github.com/signavio/signa/pkg/slack"
 )
 
@@ -88,19 +86,19 @@ type message struct {
 var m message
 
 func main() {
-	//configFile := flag.String(
-	//	"config", "/etc/signa.yaml", "Path to the configuration file.")
-	//flag.Parse()
+	//	configFile := flag.String(
+	//		"config", "/etc/signa.yaml", "Path to the configuration file.")
+	//	flag.Parse()
+	//
+	//	c := loadConfig(*configFile)
+	//	//slack.Run(*configFile, c["slack-token"].(string))
+	//
+	//	router := mux.NewRouter().StrictSlash(true)
+	//	router.HandleFunc("/", tomHandler)
+	//	log.Printf("Go!%v", c)
+	//
+	log.Fatal(http.ListenAndServe(":80", router))
 
-	//c := loadConfig(*configFile)
-	//slack.Run(*configFile, c["slack-token"].(string))
-
-	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/", tomHandler)
-	//log.Printf("Go!%v", c)
-
-	log.Fatal(http.ListenAndServe(":8080", router))
-	appengine.Main()
 }
 
 func loadConfig(file string) map[string]interface{} {
