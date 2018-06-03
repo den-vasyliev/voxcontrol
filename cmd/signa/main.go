@@ -29,6 +29,9 @@ var BuildInfo = "commit [7]"
 // Revision app
 var Revision = Version + "+" + BuildInfo[0:7]
 
+// APP_PORT app
+var APP_PORT = "443"
+
 type response struct {
 	FulfillmentText string `json:"fulfillmentText"`
 }
@@ -107,9 +110,10 @@ func main() {
 
 	log.Printf(Revision)
 	//
-	log.Fatal(http.ListenAndServeTLS(":443", "cert.pem", "key.pem", router))
-	//log.Fatal(http.ListenAndServe(":8080", router))
-
+	if os.Getenv("APP_PORT") != "" {
+		APP_PORT = os.Getenv("APP_PORT")
+	}
+	log.Fatal(http.ListenAndServeTLS(":"+APP_PORT, "cert.pem", "key.pem", router))
 }
 
 func loadConfig(file string) map[string]interface{} {
