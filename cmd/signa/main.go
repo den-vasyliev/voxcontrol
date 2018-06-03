@@ -98,7 +98,7 @@ func main() {
 	router.HandleFunc("/", tomHandler)
 	//	log.Printf("Go!%v", c)
 	//
-	log.Fatal(http.ListenAndServe(":80", router))
+	log.Fatal(http.ListenAndServe(":8080", router))
 
 }
 
@@ -122,10 +122,12 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case "GET":
+		log.Printf("Get GET Request!")
 		w.Write([]byte("Alive!"))
 		//fmt.Fprintf(w, "Hello, %q", html.EscapeString(" i have bought the tickets to the theatre"))
 		//w.Write([]byte(response))
 	case "POST":
+		log.Printf("Get POST Request!")
 		b, _ := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 		if err := json.Unmarshal(b, &m); err != nil {
 			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
