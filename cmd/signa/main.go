@@ -12,6 +12,7 @@ import (
 
 	yaml "gopkg.in/yaml.v2"
 
+	"github.com/gorilla/mux"
 	_ "github.com/signavio/signa/ext/kubernetes/deployment"
 	_ "github.com/signavio/signa/ext/kubernetes/get"
 	_ "github.com/signavio/signa/ext/kubernetes/info"
@@ -93,8 +94,8 @@ func main() {
 	//	c := loadConfig(*configFile)
 	//	//slack.Run(*configFile, c["slack-token"].(string))
 	//
-	//	router := mux.NewRouter().StrictSlash(true)
-	//	router.HandleFunc("/", tomHandler)
+	router := mux.NewRouter().StrictSlash(true)
+	router.HandleFunc("/", tomHandler)
 	//	log.Printf("Go!%v", c)
 	//
 	log.Fatal(http.ListenAndServe(":80", router))
