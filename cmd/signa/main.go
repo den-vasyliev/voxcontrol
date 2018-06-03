@@ -26,7 +26,9 @@ type Message struct {
 	Body string
 	Time int64
 }
-
+type responseOne struct {
+	fulfillmentText string
+}
 type response struct {
 	FulfillmentText     string
 	FulfillmentMessages struct {
@@ -85,6 +87,7 @@ type message struct {
 }
 
 var m message
+var resp responseOne
 
 func main() {
 	//	configFile := flag.String(
@@ -118,9 +121,7 @@ func loadConfig(file string) map[string]interface{} {
 }
 
 func tomHandler(w http.ResponseWriter, r *http.Request) {
-	type responseOne struct {
-		fulfillmentText string
-	}
+
 	//response := resp{speech: " i have bought the tickets to the theatre"}
 
 	switch r.Method {
@@ -143,8 +144,8 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 		//result, _ := info(m)
 		//mm := Message{"Alice", "Hello", 1294706395881547000}
 
-		resp := responseOne{fulfillmentText: "Alice"}
-		result, _ := json.Marshal(&resp)
+		resp.fulfillmentText = "Alice"
+		result, _ := json.Marshal(resp)
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(result))
 		// Decode the JSON in the body and overwrite 'tom' with it
