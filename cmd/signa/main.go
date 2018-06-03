@@ -98,6 +98,7 @@ func main() {
 	router.HandleFunc("/", tomHandler)
 	//	log.Printf("Go!%v", c)
 	//
+	log.Fatal(http.ListenAndServeTLS(":8443", "cert.pem", "key.pem", router))
 	log.Fatal(http.ListenAndServe(":8080", router))
 
 }
