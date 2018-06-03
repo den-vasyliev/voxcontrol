@@ -30,7 +30,7 @@ type responseOne struct {
 	FulfillmentText string `json:"fulfillmentText"`
 }
 type response struct {
-	FulfillmentText     string
+	FulfillmentText     string `json:"fulfillmentText"`
 	FulfillmentMessages struct {
 		Card struct {
 			Title    string
@@ -87,7 +87,7 @@ type message struct {
 }
 
 var m message
-var resp responseOne
+var resp response
 
 func main() {
 	//	configFile := flag.String(
