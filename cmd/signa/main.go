@@ -26,10 +26,10 @@ type Message struct {
 	Body string
 	Time int64
 }
-type responseOne struct {
+type response struct {
 	FulfillmentText string `json:"fulfillmentText"`
 }
-type response struct {
+type responseTmp struct {
 	FulfillmentText     string `json:"fulfillmentText"`
 	FulfillmentMessages struct {
 		Card struct {
