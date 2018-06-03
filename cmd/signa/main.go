@@ -29,8 +29,8 @@ var BuildInfo = "commit [7]"
 // Revision app
 var Revision = Version + "+" + BuildInfo[0:7]
 
-// APP_PORT app
-var APP_PORT = "443"
+// AppPort app
+var AppPort = "443"
 
 type response struct {
 	FulfillmentText string `json:"fulfillmentText"`
@@ -104,16 +104,21 @@ func main() {
 	//	//slack.Run(*configFile, c["slack-token"].(string))
 	//
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/", tomHandler)
 	router.HandleFunc("/version", versionHandler)
 	router.HandleFunc("/healthz", healthzHandler)
 
-	log.Printf(Revision)
+	log.Printf("Version: %v", Revision)
 	//
 	if os.Getenv("APP_PORT") != "" {
-		APP_PORT = os.Getenv("APP_PORT")
+		AppPort = os.Getenv("APP_PORT")
 	}
-	log.Fatal(http.ListenAndServeTLS(":"+APP_PORT, "cert.pem", "key.pem", router))
+	if os.Getenv("APP_KIND") == "demo" {
+		log.Printf("Mode: demo")
+		router.HandleFunc("/", demoHandler)
+		log.Fatal(http.ListenAndServe(":"+AppPort, router))
+	}
+	router.HandleFunc("/", tomHandler)
+	log.Fatal(http.ListenAndServeTLS(":"+AppPort, "cert.pem", "key.pem", router))
 }
 
 func loadConfig(file string) map[string]interface{} {
@@ -132,13 +137,18 @@ func loadConfig(file string) map[string]interface{} {
 
 func versionHandler(w http.ResponseWriter, r *http.Request) {
 	var b []byte
-	b = append([]byte("Version:"), Revision...)
+	b = append([]byte("Version: "), Revision...)
 	w.Write(b)
 }
 
 func healthzHandler(w http.ResponseWriter, r *http.Request) {
 
-	w.Write([]byte("Alive!"))
+	w.Write([]byte("Healthz: alive!"))
+}
+
+func demoHandler(w http.ResponseWriter, r *http.Request) {
+
+	w.Write([]byte("Welcome to DevOps Career Day!"))
 }
 
 func tomHandler(w http.ResponseWriter, r *http.Request) {
