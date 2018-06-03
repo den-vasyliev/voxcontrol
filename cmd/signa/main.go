@@ -27,7 +27,7 @@ type Message struct {
 	Time int64
 }
 type responseOne struct {
-	FulfillmentText string
+	FulfillmentText string `json:"fulfillmentText"`
 }
 type response struct {
 	FulfillmentText     string
