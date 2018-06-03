@@ -2,42 +2,105 @@ package main
 
 import (
 	//	"encoding/json"
-	"flag"
+	"encoding/json"
+	//	"flag"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 
-	yaml "gopkg.in/yaml.v2"
-
 	"github.com/gorilla/mux"
-	_ "github.com/signavio/signa/ext/kubernetes/deployment"
-	_ "github.com/signavio/signa/ext/kubernetes/get"
-	_ "github.com/signavio/signa/ext/kubernetes/info"
-	_ "github.com/signavio/signa/ext/kubernetes/jobs"
-	"github.com/signavio/signa/pkg/kubectl"
+	"google.golang.org/appengine"
+	yaml "gopkg.in/yaml.v2"
+	//_ "github.com/signavio/signa/ext/kubernetes/deployment"
+	//_ "github.com/signavio/signa/ext/kubernetes/get"
+	//_ "github.com/signavio/signa/ext/kubernetes/info"
+	//_ "github.com/signavio/signa/ext/kubernetes/jobs"
 	//	"github.com/signavio/signa/pkg/slack"
 )
 
-type resp struct {
-	speech      string
-	displayText string
+// Message d
+type Message struct {
+	Name string
+	Body string
+	Time int64
 }
 
-func main() {
-	configFile := flag.String(
-		"config", "/etc/signa.yaml", "Path to the configuration file.")
-	flag.Parse()
+type response struct {
+	FulfillmentText     string
+	FulfillmentMessages struct {
+		Card struct {
+			Title    string
+			Subtitle string
+			ImageURI string
+			Buttons  struct {
+				Text     string
+				Postback string
+			}
+		}
+		Source  string
+		Payload struct {
+			Google struct {
+				ExpectUserResponse bool
+				RichResponse       struct {
+					Items struct {
+						SimpleResponse struct {
+							TextToSpeech string
+						}
+					}
+				}
+			}
+			Slack struct {
+				Text string
+			}
+		}
+		OutputContexts struct {
+			Name          string
+			LifespanCount int
+			Parameters    struct {
+				Param string
+			}
+		}
+		FollowupEventInput struct {
+			Name         string
+			LanguageCode string
+			Parameters   struct {
+				Param string
+			}
+		}
+	}
+}
 
-	c := loadConfig(*configFile)
+type message struct {
+	ResponseID  string
+	Session     string
+	QueryResult struct {
+		QueryText  string
+		Parameters struct {
+			Param0 string
+			Param1 string
+		}
+	}
+}
+
+var m message
+
+func main() {
+	//configFile := flag.String(
+	//	"config", "/etc/signa.yaml", "Path to the configuration file.")
+	//flag.Parse()
+
+	//c := loadConfig(*configFile)
 	//slack.Run(*configFile, c["slack-token"].(string))
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", tomHandler)
-	log.Printf("Go!%v", c)
+	//log.Printf("Go!%v", c)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
-
+	appengine.Main()
 }
 
 func loadConfig(file string) map[string]interface{} {
@@ -60,19 +123,28 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case "GET":
-		// Just send out the JSON version of 'tom'
-		//, _ := json.Marshal(tom)
-		result, _ := info("version dev/qrem-backend")
-		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(result))
+		w.Write([]byte("Alive!"))
 		//fmt.Fprintf(w, "Hello, %q", html.EscapeString(" i have bought the tickets to the theatre"))
 		//w.Write([]byte(response))
 	case "POST":
-		result, _ := info("version dev/qrem-backend")
+		b, _ := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
+		if err := json.Unmarshal(b, &m); err != nil {
+			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+			w.WriteHeader(422) // unprocessable entity
+			if err := json.NewEncoder(w).Encode(err); err != nil {
+				panic(err)
+			}
+		}
+		//fmt.Fprintf(w, m.QueryResult.Parameters.Param)
+		//result, _ := info(m)
+		//mm := Message{"Alice", "Hello", 1294706395881547000}
+
+		resp := response{FulfillmentText: "Alice"}
+		result, _ := json.Marshal(resp)
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(result))
 		// Decode the JSON in the body and overwrite 'tom' with it
-	/*	d := json.NewDecoder(r.Body)
+	/*	d := json.NewDecoder(r.Body).
 		p := &person{}
 		err := d.Decode(p)
 		if err != nil {
@@ -94,17 +166,20 @@ const (
 	currentImageVersion      = "Current deployed image and version for `%s`: ```%s```"
 )
 
-func info(c string) (string, error) {
+func info(m message) (string, error) {
 
 	args := []string{
 		"get",
 		"deployment",
-		"qrem-backend",
+		m.QueryResult.Parameters.Param0,
 		"-o=jsonpath='{$.spec.template.spec.containers[:1].image}'",
 		"-n",
-		"dev",
+		m.QueryResult.Parameters.Param1,
 	}
-	k, err := kubectl.NewKubectl("default", args)
+
+	return fmt.Sprintf(currentImageVersion, "qrem-deploy", args), nil
+
+	/* k, err := kubectl.NewKubectl("default", args)
 	if err != nil {
 		// NOTE: Implement general logging later.
 		return "", err
@@ -117,4 +192,5 @@ func info(c string) (string, error) {
 	}
 
 	return fmt.Sprintf(currentImageVersion, "qrem-deploy", output), nil
+	*/
 }
