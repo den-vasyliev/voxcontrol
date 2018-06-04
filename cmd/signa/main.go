@@ -117,6 +117,7 @@ func main() {
 		router.HandleFunc("/", demoHandler)
 		log.Fatal(http.ListenAndServe(":"+AppPort, router))
 	}
+	log.Printf("Server listen on " + AppPort)
 	router.HandleFunc("/", tomHandler)
 	log.Fatal(http.ListenAndServeTLS(":"+AppPort, "cert.pem", "key.pem", router))
 }
