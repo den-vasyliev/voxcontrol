@@ -93,9 +93,6 @@ type message struct {
 	}
 }
 
-var m message
-var resp response
-
 func main() {
 	//	configFile := flag.String(
 	//		"config", "/etc/signa.yaml", "Path to the configuration file.")
@@ -162,6 +159,8 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 		//fmt.Fprintf(w, "Hello, %q", html.EscapeString(" i have bought the tickets to the theatre"))
 		//w.Write([]byte(response))
 	case "POST":
+		var m message
+		var resp response
 		log.Printf("Get POST Request!")
 		b, _ := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 		if err := json.Unmarshal(b, &m); err != nil {
@@ -173,10 +172,10 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		result, _ := info(m)
 
-		log.Print(result)
+		log.Print(result, m)
 
 		resp.FulfillmentText = result
-		speechText, _ := json.Marshal(&resp)
+		speechText, _ := json.Marshal(resp)
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(speechText))
 
