@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	yaml "gopkg.in/yaml.v2"
 
@@ -171,11 +172,11 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		result, _ := info(m)
-		//mm := Message{"Alice", "Hello", 1294706395881547000}
+
 		log.Print(result)
+
 		resp.FulfillmentText = result
 		speechText, _ := json.Marshal(&resp)
-		//log.Print(resp)
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(speechText))
 
@@ -218,6 +219,6 @@ func info(m message) (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf(currentImageVersion, m.QueryResult.Parameters.Param0, output), nil
+	return fmt.Sprintf(currentImageVersion, m.QueryResult.Parameters.Param0, strings.Split(strings.Split(output, "/")[len(strings.Split(output, "/"))-1], ":")[1]), nil
 
 }
