@@ -170,24 +170,15 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 				panic(err)
 			}
 		}
-		fmt.Fprintf(w, m.QueryResult.Parameters.Param0)
-		//result, _ := info(m)
+		result, _ := info(m)
 		//mm := Message{"Alice", "Hello", 1294706395881547000}
-
-		resp.FulfillmentText = "Alice"
-		result, _ := json.Marshal(&resp)
-		log.Print(resp)
+		log.Print(result)
+		resp.FulfillmentText = result
+		speechText, _ := json.Marshal(&resp)
+		//log.Print(resp)
 		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(result))
-		// Decode the JSON in the body and overwrite 'tom' with it
-	/*	d := json.NewDecoder(r.Body).
-		p := &person{}
-		err := d.Decode(p)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-		tom = p
-	*/
+		w.Write([]byte(speechText))
+
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		fmt.Fprintf(w, "I can't do that.")
@@ -199,7 +190,7 @@ const (
 	invalidParams         = "Invalid parameters"
 
 	noNamespaceNorDeployment = "No Namespace nor Deployment found in argument"
-	currentImageVersion      = "Current deployed image and version for `%s`: ```%s```"
+	currentImageVersion      = "Current deployed image and version for %s: %s"
 )
 
 func info(m message) (string, error) {
@@ -213,7 +204,7 @@ func info(m message) (string, error) {
 		m.QueryResult.Parameters.Param1,
 	}
 
-	return fmt.Sprintf(currentImageVersion, "qrem-deploy", args), nil
+	//return fmt.Sprintf(currentImageVersion, "qrem-deploy", args), nil
 
 	k, err := kubectl.NewKubectl("default", args)
 	if err != nil {
@@ -227,6 +218,6 @@ func info(m message) (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf(currentImageVersion, "qrem-deploy", output), nil
+	return fmt.Sprintf(currentImageVersion, m.QueryResult.Parameters.Param0, output), nil
 
 }
