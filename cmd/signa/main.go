@@ -15,8 +15,8 @@ import (
 	"github.com/gorilla/mux"
 	_ "github.com/signavio/signa/ext/kubernetes/deployment"
 	_ "github.com/signavio/signa/ext/kubernetes/get"
-	_ "github.com/signavio/signa/ext/kubernetes/info"
 	_ "github.com/signavio/signa/ext/kubernetes/jobs"
+	"github.com/signavio/signa/pkg/kubectl"
 	//	"github.com/signavio/signa/pkg/slack"
 )
 
@@ -215,7 +215,7 @@ func info(m message) (string, error) {
 
 	return fmt.Sprintf(currentImageVersion, "qrem-deploy", args), nil
 
-	/* k, err := kubectl.NewKubectl("default", args)
+	k, err := kubectl.NewKubectl("default", args)
 	if err != nil {
 		// NOTE: Implement general logging later.
 		return "", err
@@ -228,5 +228,5 @@ func info(m message) (string, error) {
 	}
 
 	return fmt.Sprintf(currentImageVersion, "qrem-deploy", output), nil
-	*/
+
 }
