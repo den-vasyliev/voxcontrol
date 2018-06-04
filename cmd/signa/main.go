@@ -24,10 +24,10 @@ import (
 var Version = "version"
 
 // BuildInfo app
-var BuildInfo = "commit [7]"
+var BuildInfo = "commit"
 
 // Revision app
-var Revision = Version + "+" + BuildInfo[0:7]
+var Revision = Version + "+" + BuildInfo
 
 // AppPort app
 var AppPort = "443"
@@ -113,7 +113,7 @@ func main() {
 		AppPort = os.Getenv("APP_PORT")
 	}
 	if os.Getenv("APP_KIND") == "demo" {
-		log.Printf("Mode: demo")
+		log.Printf("Mode: demo Server on: " + AppPort)
 		router.HandleFunc("/", demoHandler)
 		log.Fatal(http.ListenAndServe(":"+AppPort, router))
 	}
