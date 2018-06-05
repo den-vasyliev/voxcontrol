@@ -87,10 +87,20 @@ type message struct {
 	QueryResult struct {
 		QueryText  string
 		Parameters struct {
-			Param0 string
-			Param1 string
+			ClusterCommand  string
+			ClusterResource string
+			ApplicationName string
+			EnvironmentName string
 		}
 	}
+}
+
+type args struct {
+	command         string //	"get"
+	resource        string //	"deployment"
+	applicationName string //	m.QueryResult.Parameters.ApplicationName
+	jsonPath        string // 	"-o=jsonpath='{$.spec.template.spec.containers[:1].image}'"
+	environment     string //	"-n" m.QueryResult.Parameters.EnvironmentName
 }
 
 func main() {
@@ -161,6 +171,8 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		var m message
 		var resp response
+		var arg []string
+
 		log.Printf("Get POST Request!")
 		b, _ := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 		if err := json.Unmarshal(b, &m); err != nil {
@@ -170,7 +182,18 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 				panic(err)
 			}
 		}
-		result, _ := info(m)
+		switch m.QueryResult.Parameters.ClusterCommand {
+		case "get":
+
+			arg = []string{m.QueryResult.Parameters.ClusterCommand,
+				m.QueryResult.Parameters.ClusterResource,
+				m.QueryResult.Parameters.ApplicationName,
+				"-o=jsonpath='{$.spec.template.spec.containers[:1].image}'",
+				"-n" + m.QueryResult.Parameters.EnvironmentName}
+
+		}
+
+		result, _ := kubeCtl(m, arg)
 
 		log.Print(result, m)
 
@@ -193,20 +216,11 @@ const (
 	currentImageVersion      = "Current deployed image and version for %s: %s"
 )
 
-func info(m message) (string, error) {
-
-	args := []string{
-		"get",
-		"deployment",
-		m.QueryResult.Parameters.Param0,
-		"-o=jsonpath='{$.spec.template.spec.containers[:1].image}'",
-		"-n",
-		m.QueryResult.Parameters.Param1,
-	}
+func kubeCtl(m message, arg []string) (string, error) {
 
 	//return fmt.Sprintf(currentImageVersion, "qrem-deploy", args), nil
 
-	k, err := kubectl.NewKubectl("default", args)
+	k, err := kubectl.NewKubectl("default", arg)
 	if err != nil {
 		// NOTE: Implement general logging later.
 		return "", err
@@ -218,6 +232,6 @@ func info(m message) (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf(currentImageVersion, m.QueryResult.Parameters.Param0, strings.Split(strings.Split(output, "/")[len(strings.Split(output, "/"))-1], ":")[1]), nil
+	return fmt.Sprintf(currentImageVersion, m.QueryResult.Parameters.ApplicationName, strings.Split(strings.Split(output, "/")[len(strings.Split(output, "/"))-1], ":")[1]), nil
 
 }
