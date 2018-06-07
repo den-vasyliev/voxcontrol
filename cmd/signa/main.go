@@ -2,6 +2,7 @@ package main
 
 import (
 	//	"encoding/json"
+
 	"encoding/json"
 	"fmt"
 	"io"
@@ -91,6 +92,8 @@ type message struct {
 			ClusterResource string
 			ApplicationName string
 			EnvironmentName string
+			Formatting      string
+			Label           string
 		}
 	}
 }
@@ -172,8 +175,8 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 		var m message
 		var resp response
 		var arg []string
+		//var result string
 
-		log.Printf("Get POST Request!")
 		b, _ := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 		if err := json.Unmarshal(b, &m); err != nil {
 			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -190,22 +193,39 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 				m.QueryResult.Parameters.ApplicationName,
 				"-o=jsonpath='{$.spec.template.spec.containers[:1].image}'",
 				"-n" + m.QueryResult.Parameters.EnvironmentName}
+			result, _ := kubeCtl(m, arg)
+			result = fmt.Sprintf(currentImageVersion, m.QueryResult.Parameters.ApplicationName, strings.Split(strings.Split(result, "/")[len(strings.Split(result, "/"))-1], ":")[1])
+
+			log.Print(result, m)
+
+		case "getDeployment":
+
+			arg = []string{"get",
+				m.QueryResult.Parameters.ClusterResource,
+				"-n" + m.QueryResult.Parameters.EnvironmentName,
+				m.QueryResult.Parameters.Formatting, "--no-headers",
+				m.QueryResult.Parameters.Label}
+			result, _ := kubeCtl(m, arg)
+			log.Print(result, m)
+
+			resp.FulfillmentText = result
+			speechText, _ := json.Marshal(resp)
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(speechText))
+		case "canaryDeployment":
+			//k -n demo get svc front-canary -o yaml --export|sed 's/weight: [0-9]$/weight: 50/
 
 		}
 
-		result, _ := kubeCtl(m, arg)
-
-		log.Print(result, m)
-
-		resp.FulfillmentText = result
+	default:
+		var resp response
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		resp.FulfillmentText = "Sorry, I can't do that."
 		speechText, _ := json.Marshal(resp)
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(speechText))
-
-	default:
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		fmt.Fprintf(w, "I can't do that.")
 	}
+
 }
 
 const (
@@ -223,15 +243,14 @@ func kubeCtl(m message, arg []string) (string, error) {
 	k, err := kubectl.NewKubectl("default", arg)
 	if err != nil {
 		// NOTE: Implement general logging later.
-		return "", err
+		return "Something went wrong. Ask kube for help: NewKubectl", err
 	}
 
 	output, err := k.Exec()
 	if err != nil {
 		// NOTE: Implement general logging later.
-		return "", err
+		return "Something went wrong. Ask kube for help: Exec", err
 	}
 
-	return fmt.Sprintf(currentImageVersion, m.QueryResult.Parameters.ApplicationName, strings.Split(strings.Split(output, "/")[len(strings.Split(output, "/"))-1], ":")[1]), nil
-
+	return output, nil
 }
