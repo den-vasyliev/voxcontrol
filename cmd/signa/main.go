@@ -198,6 +198,11 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 
 			log.Print(result, m)
 
+			resp.FulfillmentText = result
+			speechText, _ := json.Marshal(resp)
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(speechText))
+
 		case "getDeployment":
 
 			arg = []string{"get",
