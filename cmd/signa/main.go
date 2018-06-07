@@ -35,10 +35,8 @@ var Revision = Version + "+" + BuildInfo
 var AppPort = "443"
 
 type response struct {
-	Speech      string `json:"speech"`
-	DisplayText string `json:"displayText"`
+	FulfillmentText string `json:"fulfillmentText"`
 }
-
 type responseTmp struct {
 	FulfillmentText     string `json:"fulfillmentText"`
 	FulfillmentMessages struct {
@@ -85,23 +83,6 @@ type responseTmp struct {
 }
 
 type message struct {
-	OriginalRequest string
-	Session         string
-	Result          struct {
-		QueryText  string
-		Parameters struct {
-			ClusterCommand  string
-			ClusterResource string
-			ApplicationName string
-			EnvironmentName string
-			Formatting      string
-			Label           string
-			Speech          string
-		}
-	}
-}
-
-type messageV2 struct {
 	ResponseID  string
 	Session     string
 	QueryResult struct {
@@ -204,37 +185,30 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 				panic(err)
 			}
 		}
-		switch m.Result.Parameters.ClusterCommand {
+		switch m.QueryResult.Parameters.ClusterCommand {
 		case "get":
 
-			arg = []string{m.Result.Parameters.ClusterCommand,
-				m.Result.Parameters.ClusterResource,
-				m.Result.Parameters.ApplicationName,
+			arg = []string{m.QueryResult.Parameters.ClusterCommand,
+				m.QueryResult.Parameters.ClusterResource,
+				m.QueryResult.Parameters.ApplicationName,
 				"-o=jsonpath='{$.spec.template.spec.containers[:1].image}'",
-				"-n" + m.Result.Parameters.EnvironmentName}
+				"-n" + m.QueryResult.Parameters.EnvironmentName}
 			result, _ := kubeCtl(m, arg)
-			result = fmt.Sprintf(currentImageVersion, m.Result.Parameters.ApplicationName, strings.Split(strings.Split(result, "/")[len(strings.Split(result, "/"))-1], ":")[1])
+			result = fmt.Sprintf(currentImageVersion, m.QueryResult.Parameters.ApplicationName, strings.Split(strings.Split(result, "/")[len(strings.Split(result, "/"))-1], ":")[1])
 
 			log.Print(result, m)
-
-			resp.DisplayText = result
-			resp.Speech = result
-			speechText, _ := json.Marshal(resp)
-			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(speechText))
 
 		case "getDeployment":
 
 			arg = []string{"get",
-				m.Result.Parameters.ClusterResource,
-				"-n" + m.Result.Parameters.EnvironmentName,
-				m.Result.Parameters.Formatting, "--no-headers",
-				m.Result.Parameters.Label}
+				m.QueryResult.Parameters.ClusterResource,
+				"-n" + m.QueryResult.Parameters.EnvironmentName,
+				m.QueryResult.Parameters.Formatting, "--no-headers",
+				m.QueryResult.Parameters.Label}
 			result, _ := kubeCtl(m, arg)
 			log.Print(result, m)
 
-			resp.DisplayText = result
-			resp.Speech = m.Result.Parameters.Speech
+			resp.FulfillmentText = result
 			speechText, _ := json.Marshal(resp)
 			w.Header().Set("Content-Type", "application/json")
 			w.Write([]byte(speechText))
@@ -246,7 +220,7 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 	default:
 		var resp response
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		resp.Speech = "Sorry, I can't do that."
+		resp.FulfillmentText = "Sorry, I can't do that."
 		speechText, _ := json.Marshal(resp)
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(speechText))
