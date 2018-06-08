@@ -226,7 +226,11 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 				"deployment",
 				m.QueryResult.Parameters.ApplicationName,
 				"--replicas " + m.QueryResult.Parameters.Replicas}
-			result, _ := kubeCtl(m, arg)
+			result, err := kubeCtl(m, arg)
+			if err != nil {
+				log.Print("Open db err: ", err)
+
+			}
 			log.Print(result, m)
 
 			resp.FulfillmentText = "Frontend scaled up to " + m.QueryResult.Parameters.Replicas + " replicas"
