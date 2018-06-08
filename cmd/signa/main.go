@@ -3,6 +3,7 @@ package main
 import (
 	//	"encoding/json"
 
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"strings"
 
 	yaml "gopkg.in/yaml.v2"
@@ -226,7 +228,7 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 				m.QueryResult.Parameters.ApplicationName,
 				"-n " + m.QueryResult.Parameters.EnvironmentName,
 				"--replicas " + m.QueryResult.Parameters.Replicas}
-			result, _ := kubeCtl(m, arg)
+			result, _ := k(m, arg)
 
 			log.Print(result, arg)
 
@@ -275,4 +277,16 @@ func kubeCtl(m message, arg []string) (string, error) {
 	}
 
 	return output, nil
+}
+
+func k(m message, arg []string) (string, error) {
+
+	cmd := exec.Command("/usr/bin/kubectl", strings.Join(arg, " "))
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return out.String(), err
 }
