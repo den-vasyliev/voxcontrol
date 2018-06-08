@@ -224,7 +224,7 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 			arg = []string{"-n demo",
 				"scale",
 				"deployment",
-				"front-v1",
+				m.QueryResult.Parameters.ApplicationName,
 				"--replicas " + m.QueryResult.Parameters.Replicas}
 			result, _ := kubeCtl(m, arg)
 			log.Print(result, m)
