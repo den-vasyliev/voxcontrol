@@ -3,7 +3,6 @@ package main
 import (
 	//	"encoding/json"
 
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -222,21 +221,22 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte(speechText))
 
 		case "scale":
-
+			m.QueryResult.Parameters.ApplicationName = "front-v1"
 			arg = []string{"scale",
 				"deployment",
 				m.QueryResult.Parameters.ApplicationName,
-				"-n " + m.QueryResult.Parameters.EnvironmentName,
-				"--replicas " + m.QueryResult.Parameters.Replicas}
-			result, _ := k(m, arg)
+				"-n", m.QueryResult.Parameters.EnvironmentName,
+				"--replicas", m.QueryResult.Parameters.Replicas}
 
-			log.Print(result, arg)
+			result, err := kubeCtl(m, arg)
+			//result, err := exec.Command("/usr/local/bin/kubectl", "scale", "deployment", m.QueryResult.Parameters.ApplicationName, "--replicas", m.QueryResult.Parameters.Replicas, "-n", m.QueryResult.Parameters.EnvironmentName).Output()
+
+			log.Print("result: ", string(result), arg, err)
 
 			resp.FulfillmentText = "Frontend scaled up to " + m.QueryResult.Parameters.Replicas + " replicas"
 			speechText, _ := json.Marshal(resp)
 			w.Header().Set("Content-Type", "application/json")
 			w.Write([]byte(speechText))
-
 			//k -n demo get svc front-canary -o yaml --export|sed 's/weight: [0-9]$/weight: 50/
 
 		}
@@ -279,14 +279,11 @@ func kubeCtl(m message, arg []string) (string, error) {
 	return output, nil
 }
 
-func k(m message, arg []string) (string, error) {
+func k(m message, arg string) (string, error) {
 
-	cmd := exec.Command("/usr/bin/kubectl", strings.Join(arg, " "))
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	err := cmd.Run()
+	out, err := exec.Command("/usr/local/bin/kubectl", "scale", "deployment", "front-v1", "--replicas=1", "-n", "demo").Output()
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
-	return out.String(), err
+	return string(out), err
 }
