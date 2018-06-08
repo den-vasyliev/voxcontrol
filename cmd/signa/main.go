@@ -226,12 +226,9 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 				"deployment",
 				m.QueryResult.Parameters.ApplicationName,
 				"--replicas " + m.QueryResult.Parameters.Replicas}
-			result, err := kubeCtl(m, arg)
-			if err != nil {
-				log.Print("Open db err: ", err)
+			result, _ := kubeCtl(m, arg)
 
-			}
-			log.Print(result, m)
+			log.Print(result, arg)
 
 			resp.FulfillmentText = "Frontend scaled up to " + m.QueryResult.Parameters.Replicas + " replicas"
 			speechText, _ := json.Marshal(resp)
@@ -274,7 +271,7 @@ func kubeCtl(m message, arg []string) (string, error) {
 	output, err := k.Exec()
 	if err != nil {
 		// NOTE: Implement general logging later.
-		return "Something went wrong. Ask kube for help: Exec", err
+		return "Something went wrong. Ask kube for help:", err
 	}
 
 	return output, nil
