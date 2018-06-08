@@ -221,10 +221,10 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 
 		case "scale":
 
-			arg = []string{"-n demo",
-				"scale",
+			arg = []string{"scale",
 				"deployment",
 				m.QueryResult.Parameters.ApplicationName,
+				"-n " + m.QueryResult.Parameters.EnvironmentName,
 				"--replicas " + m.QueryResult.Parameters.Replicas}
 			result, _ := kubeCtl(m, arg)
 
