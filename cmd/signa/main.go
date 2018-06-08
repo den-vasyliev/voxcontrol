@@ -188,11 +188,11 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 		switch m.QueryResult.Parameters.ClusterCommand {
 		case "get":
 
-			arg = []string{m.QueryResult.Parameters.ClusterCommand,
-				m.QueryResult.Parameters.ClusterResource,
-				m.QueryResult.Parameters.ApplicationName,
+			arg = []string{"get",
+				"deployment",
+				"front-v1",
 				"-o=jsonpath='{$.spec.template.spec.containers[:1].image}'",
-				"-n" + m.QueryResult.Parameters.EnvironmentName}
+				"-n" + "demo"}
 			result, _ := kubeCtl(m, arg)
 			result = fmt.Sprintf(currentImageVersion, m.QueryResult.Parameters.ApplicationName, strings.Split(strings.Split(result, "/")[len(strings.Split(result, "/"))-1], ":")[1])
 
@@ -204,7 +204,7 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte(speechText))
 
 		case "getDeployment":
-
+			m.QueryResult.Parameters.ClusterResource = "deployment"
 			arg = []string{"get",
 				m.QueryResult.Parameters.ClusterResource,
 				"-n" + m.QueryResult.Parameters.EnvironmentName,
@@ -217,7 +217,22 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 			speechText, _ := json.Marshal(resp)
 			w.Header().Set("Content-Type", "application/json")
 			w.Write([]byte(speechText))
-		case "canaryDeployment":
+
+		case "scale":
+
+			arg = []string{"scale",
+				"-n demo",
+				"deployment",
+				"front-v1",
+				"--replicas " + m.QueryResult.Parameters.Label}
+			result, _ := kubeCtl(m, arg)
+			log.Print(result, m)
+
+			resp.FulfillmentText = "Frontend scaled up to " + m.QueryResult.Parameters.Label + " replicas"
+			speechText, _ := json.Marshal(resp)
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(speechText))
+
 			//k -n demo get svc front-canary -o yaml --export|sed 's/weight: [0-9]$/weight: 50/
 
 		}
