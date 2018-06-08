@@ -89,13 +89,15 @@ type message struct {
 	QueryResult struct {
 		QueryText  string
 		Parameters struct {
-			ClusterCommand  string
-			ClusterResource string
-			ApplicationName string
-			EnvironmentName string
-			Formatting      string
-			Label           string
-			Replicas        string
+			ClusterCommand    string
+			ClusterResource   string
+			ApplicationName   string
+			EnvironmentName   string
+			Formatting        string
+			Label             string
+			Replicas          string
+			Version           string
+			ApplicationCanary string
 		}
 	}
 }
@@ -237,8 +239,18 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 			speechText, _ := json.Marshal(resp)
 			w.Header().Set("Content-Type", "application/json")
 			w.Write([]byte(speechText))
-			//k -n demo get svc front-canary -o yaml --export|sed 's/weight: [0-9]$/weight: 50/
+		//k -n demo get svc front-canary -o yaml --export|sed 's/weight:.[0-9]$/weight: 50/'
 
+		case "canary":
+
+			result, err := exec.Command("/bin/bash", "/tmp/canary.sh", m.QueryResult.Parameters.ApplicationCanary).Output()
+
+			log.Print("result: ", string(result), arg, err)
+
+			resp.FulfillmentText = "Canary applyed to " + m.QueryResult.Parameters.ApplicationCanary + " percent"
+			speechText, _ := json.Marshal(resp)
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(speechText))
 		}
 
 	default:
