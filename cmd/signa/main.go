@@ -94,6 +94,7 @@ type message struct {
 			EnvironmentName string
 			Formatting      string
 			Label           string
+			Replicas        string
 		}
 	}
 }
@@ -228,7 +229,7 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 			result, _ := kubeCtl(m, arg)
 			log.Print(result, m)
 
-			resp.FulfillmentText = "Frontend scaled up to " + m.QueryResult.Parameters.Label + " replicas"
+			resp.FulfillmentText = "Frontend scaled up to " + m.QueryResult.Parameters.Replicas + " replicas"
 			speechText, _ := json.Marshal(resp)
 			w.Header().Set("Content-Type", "application/json")
 			w.Write([]byte(speechText))
