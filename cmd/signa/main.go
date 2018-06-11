@@ -98,6 +98,7 @@ type message struct {
 			Replicas          string
 			Version           string
 			ApplicationCanary string
+			ApplicationIstio  string
 		}
 	}
 }
@@ -251,8 +252,17 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 			speechText, _ := json.Marshal(resp)
 			w.Header().Set("Content-Type", "application/json")
 			w.Write([]byte(speechText))
-		}
 
+		case "istio":
+			result, err := exec.Command("/bin/bash", "/tmp/istio.sh", m.QueryResult.Parameters.ApplicationIstio).Output()
+
+			log.Print("result: ", string(result), arg, err)
+
+			resp.FulfillmentText = "Traffic Policy applyed to " + m.QueryResult.Parameters.ApplicationCanary + " percent"
+			speechText, _ := json.Marshal(resp)
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(speechText))
+		}
 	default:
 		var resp response
 		w.WriteHeader(http.StatusMethodNotAllowed)
