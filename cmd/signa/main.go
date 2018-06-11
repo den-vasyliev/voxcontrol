@@ -135,7 +135,7 @@ func main() {
 	}
 	log.Printf("Server listen on " + AppPort)
 	router.HandleFunc("/", tomHandler)
-	log.Fatal(http.ListenAndServeTLS(":"+AppPort, "cert.pem", "key.pem", router))
+	log.Fatal(http.ListenAndServeTLS(":"+AppPort, "~/.ssh/cert.pem", "~/.ssh/key.pem", router))
 }
 
 func loadConfig(file string) map[string]interface{} {
