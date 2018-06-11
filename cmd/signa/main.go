@@ -32,6 +32,12 @@ var BuildInfo = "commit"
 // Revision app
 var Revision = Version + "+" + BuildInfo
 
+// TlsCert path
+var TlsCert = os.Getenv("TLS_CERT_PATH")
+
+// TlsKey path
+var TlsKey = os.Getenv("TLS_KEY_PATH")
+
 // AppPort app
 var AppPort = "443"
 
@@ -135,7 +141,7 @@ func main() {
 	}
 	log.Printf("Server listen on " + AppPort)
 	router.HandleFunc("/", tomHandler)
-	log.Fatal(http.ListenAndServeTLS(":"+AppPort, "~/.ssh/cert.pem", "~/.ssh/key.pem", router))
+	log.Fatal(http.ListenAndServeTLS(":"+AppPort, CERT, KEY, router))
 }
 
 func loadConfig(file string) map[string]interface{} {
