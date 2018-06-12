@@ -250,7 +250,7 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 
 		case "canary":
 
-			result, err := exec.Command("/bin/bash", "/tmp/canary.sh", m.QueryResult.Parameters.ApplicationCanary).Output()
+			result, err := exec.Command("/tmp/canary.sh", m.QueryResult.Parameters.ApplicationCanary).Output()
 
 			log.Print("result: ", string(result), arg, err)
 
@@ -260,7 +260,7 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte(speechText))
 
 		case "istio":
-			result, err := exec.Command("/bin/bash", "/tmp/istio.sh", m.QueryResult.Parameters.ApplicationIstio).Output()
+			result, err := exec.Command("/tmp/istio.sh", m.QueryResult.Parameters.ApplicationCanary).Output()
 
 			log.Print("result: ", string(result), arg, err)
 
