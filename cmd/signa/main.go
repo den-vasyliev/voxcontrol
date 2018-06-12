@@ -187,7 +187,7 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 		var resp response
 		var arg []string
 		//var result string
-
+		log.Print("Get POST Request: ", m.QueryResult.Parameters.ClusterCommand)
 		b, _ := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 		if err := json.Unmarshal(b, &m); err != nil {
 			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
