@@ -270,9 +270,10 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte(speechText))
 		}
 	default:
+		log.Print("default section")
 		var resp response
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		resp.FulfillmentText = "Sorry, I can't do that."
+		resp.FulfillmentText = "Sorry, unknown command"
 		speechText, _ := json.Marshal(resp)
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(speechText))
