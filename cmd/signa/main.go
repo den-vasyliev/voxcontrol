@@ -239,7 +239,7 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 
 			result, err := kubeCtl(m, arg)
 			if err != nil {
-				resp.FulfillmentText = "Frontend not scaled. And i don't know why. maybe this error will tell you more" + string(err.Error())
+				resp.FulfillmentText = "Frontend not scaled. And i don't know why. maybe this error will tell you more " + string(err.Error())
 
 			} else {
 				resp.FulfillmentText = "Frontend scaled up to " + m.QueryResult.Parameters.Replicas + " replicas"
@@ -259,7 +259,7 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 
 			log.Print("result: ", string(result), arg, err)
 			if err != nil {
-				resp.FulfillmentText = "Canary not applyed. PLease check if service exists. I've got an error" + string(err.Error())
+				resp.FulfillmentText = "Canary not applyed. PLease check if service exists. I've got an error " + string(err.Error())
 
 			} else {
 				resp.FulfillmentText = "Canary applyed to " + m.QueryResult.Parameters.ApplicationCanary + " percent"
@@ -274,7 +274,7 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 
 			log.Print("result: ", string(result), arg, err)
 			if err != nil {
-				resp.FulfillmentText = "Traffic Policy not applyed. Please check an error" + err.Error()
+				resp.FulfillmentText = "Traffic Policy not applyed. Please check an error " + err.Error()
 
 			} else {
 				resp.FulfillmentText = "Traffic Policy applyed to " + m.QueryResult.Parameters.ApplicationCanary + " percent"
