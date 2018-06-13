@@ -238,8 +238,13 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 				"--replicas", m.QueryResult.Parameters.Replicas}
 
 			result, err := kubeCtl(m, arg)
-			//result, err := exec.Command("/usr/local/bin/kubectl", "scale", "deployment", m.QueryResult.Parameters.ApplicationName, "--replicas", m.QueryResult.Parameters.Replicas, "-n", m.QueryResult.Parameters.EnvironmentName).Output()
+			if err != nil {
+				resp.FulfillmentText = "Frontend not scaled. And i don't know why. maybe this error will tell you more" + string(err.Error())
 
+			} else {
+				resp.FulfillmentText = "Frontend scaled up to " + m.QueryResult.Parameters.Replicas + " replicas"
+
+			}
 			log.Print("result: ", string(result), arg, err)
 
 			resp.FulfillmentText = "Frontend scaled up to " + m.QueryResult.Parameters.Replicas + " replicas"
@@ -253,8 +258,13 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 			result, err := exec.Command("/tmp/canary.sh", m.QueryResult.Parameters.ApplicationCanary).Output()
 
 			log.Print("result: ", string(result), arg, err)
+			if err != nil {
+				resp.FulfillmentText = "Canary not applyed. PLease check if service exists. I've got an error" + string(err.Error())
 
-			resp.FulfillmentText = "Canary applyed to " + m.QueryResult.Parameters.ApplicationCanary + " percent"
+			} else {
+				resp.FulfillmentText = "Canary applyed to " + m.QueryResult.Parameters.ApplicationCanary + " percent"
+
+			}
 			speechText, _ := json.Marshal(resp)
 			w.Header().Set("Content-Type", "application/json")
 			w.Write([]byte(speechText))
@@ -263,8 +273,13 @@ func tomHandler(w http.ResponseWriter, r *http.Request) {
 			result, err := exec.Command("/tmp/istio.sh", m.QueryResult.Parameters.ApplicationCanary).Output()
 
 			log.Print("result: ", string(result), arg, err)
+			if err != nil {
+				resp.FulfillmentText = "Traffic Policy not applyed. Please check an error" + err.Error()
 
-			resp.FulfillmentText = "Traffic Policy applyed to " + m.QueryResult.Parameters.ApplicationCanary + " percent"
+			} else {
+				resp.FulfillmentText = "Traffic Policy applyed to " + m.QueryResult.Parameters.ApplicationCanary + " percent"
+
+			}
 			speechText, _ := json.Marshal(resp)
 			w.Header().Set("Content-Type", "application/json")
 			w.Write([]byte(speechText))
